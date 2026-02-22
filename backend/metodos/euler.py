@@ -1,0 +1,1 @@
+print("aqui pondre la logica del metodo euler mejorado")
