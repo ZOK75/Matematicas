@@ -3,8 +3,10 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-# --- CONFIGURACIÓN DE RUTAS ---
+# Obtenemos la ruta de la carpeta 'backend'
 backend_path = os.path.dirname(os.path.abspath(__file__))
+
+# Añadimos 'utils' y 'metodos' al sistema para que Python los vea directamente
 sys.path.append(os.path.join(backend_path, 'utils'))
 sys.path.append(os.path.join(backend_path, 'metodos'))
 
@@ -16,6 +18,7 @@ try:
     from runge_kutta import runge_kutta
 except ImportError as e:
     print(f"Error crítico de importación: {e}")
+    print("Asegúrate de que los archivos existan en las carpetas utils/ y metodos/")
     sys.exit(1)
 
 app = Flask(__name__)
