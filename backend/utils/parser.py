@@ -1,26 +1,15 @@
+
 import sympy as sp
 
-
-def parse_function(function_str: str):
-    """
-    Convierte un string matemático en una función evaluable f(x, y).
-
-    Ej acepta expresiones como:
-        x + y
-        sin(x) - y
-        x*y
-        exp(x) - y
-        log(x) + y
-
-    Retorna:
-        función Python f(x, y)
-    """
-
+def parse_function(function_str: str, metodo: str="euler"):
     if not function_str or not function_str.strip():
         raise ValueError("La función no puede estar vacía")
 
     try:
-        # Definir variables simbólicas permitidas
+        # Normalizar a minúsculas
+        function_str = function_str.lower()
+
+        # Definir variables simbólicas
         x, y = sp.symbols('x y')
 
         # Funciones matemáticas permitidas
@@ -31,28 +20,39 @@ def parse_function(function_str: str):
             "exp": sp.exp,
             "log": sp.log,
             "sqrt": sp.sqrt,
+            "ln": sp.log,   # alias
+            "pow": sp.Pow,  # alias
         }
 
         # Convertir string a expresión simbólica segura
         expr = sp.sympify(function_str, locals=allowed_functions)
 
-        # Verificar que solo use x y y
+        # Validación según método
         variables = expr.free_symbols
-        if not variables.issubset({x, y}):
-            raise ValueError("Solo se permiten las variables x y y")
+        if metodo in ["euler", "runge_kutta"]:
+            if not variables.issubset({x, y}):
+                raise ValueError("Solo se permiten las variables x y y")
+            func = sp.lambdify((x, y), expr, modules=["math"])
+            def safe_function(x_val, y_val):
+                try:
+                    return float(func(x_val, y_val))
+                except Exception as e:
+                    raise ValueError(f"Error al evaluar la función: {e}")
+            return safe_function
 
-        # Convertir a función numérica rápida
-        func = sp.lambdify((x, y), expr, modules=["math"])
+        elif metodo == "newton":
+            if not variables.issubset({x}):
+                raise ValueError("Solo se permite la variable x")
+            func = sp.lambdify(x, expr, modules=["math"])
+            def safe_function(x_val):
+                try:
+                    return float(func(x_val))
+                except Exception as e:
+                    raise ValueError(f"Error al evaluar la función: {e}")
+            return safe_function
 
-        # Wrapper para manejar errores numéricos
-        def safe_function(x_val, y_val):
-            try:
-                result = func(x_val, y_val)
-                return float(result)
-            except Exception as e:
-                raise ValueError(f"Error al evaluar la función: {e}")
-
-        return safe_function
+        else:
+            raise ValueError("Método desconocido")
 
     except Exception as e:
         raise ValueError(f"Función inválida: {e}")
