@@ -33,12 +33,11 @@ def calcular():
     try:
         if metodo == 'newton':
             try:
-                # Usamos el parser para validar y crear la función
                 f_calc = parse_function(params['funcion'], metodo="newton")
                 x0 = float(params['x0'])
+                tol = float(params.get('tol', 1e-7))        # si no lo mandan, usa 1e-7
 
-                # Ejecutamos el algoritmo
-                root, historial = newton_raphson(f_calc, x0)
+                root, historial = newton_raphson(f_calc, x0, tol=tol)
 
                 return jsonify({
                     'root': float(root),
