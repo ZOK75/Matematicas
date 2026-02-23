@@ -33,6 +33,7 @@
 
     <div v-if="resultados" style="margin-top: 30px;">
       <h3>Resultados</h3>
+
       <table border="1" style="width: 100%; border-collapse: collapse; text-align: center;">
         <thead>
           <tr style="background-color: #f2f2f2;">
@@ -44,51 +45,108 @@
         <tbody>
           <tr v-for="(x, i) in resultados.x_values" :key="i">
             <td>{{ i }}</td>
-            <td>{{ x.toFixed(4) }}</td>
-            <td>{{ resultados.y_values[i].toFixed(4) }}</td>
+            <td>{{ Number(x).toFixed(4) }}</td>
+            <td>{{ Number(resultados.y_values[i]).toFixed(4) }}</td>
           </tr>
         </tbody>
       </table>
+
+      <!-- GRÁFICA -->
+      <canvas
+        ref="graficaCanvas"
+        style="margin-top: 30px;"
+      ></canvas>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
+import { ref, watch, nextTick } from 'vue'
+import axios from 'axios'
+import { Chart } from 'chart.js/auto'
 
-const metodo = ref('euler');
-const loading = ref(false);
-const resultados = ref(null);
+const metodo = ref('euler')
+const loading = ref(false)
+const resultados = ref(null)
+const graficaCanvas = ref(null)
+
+let chartInstance = null
 
 const form = ref({
   funcion: '',
   x0: 0,
-  y0: 0, // Aunque Newton no lo use, enviamos un 0
+  y0: 0,
   h: 0.1,
   n: 10
-});
+})
 
 const enviarDatos = async () => {
   if (!form.value.funcion) {
-    alert("Por favor escribe una función");
-    return;
+    alert("Por favor escribe una función")
+    return
   }
 
-  loading.value = true;
-  resultados.value = null;
+  loading.value = true
+  resultados.value = null
 
   try {
     const res = await axios.post('http://localhost:5000/api/calcular', {
       metodo: metodo.value,
       params: form.value
-    });
-    resultados.value = res.data;
+    })
+
+    resultados.value = res.data
+
   } catch (err) {
-    console.error(err);
-    alert("Error: " + (err.response?.data?.error || "No se pudo conectar con el servidor Python"));
+    console.error(err)
+    alert("Error: " + (err.response?.data?.error || "No se pudo conectar con el servidor Python"))
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
+
+watch(resultados, async (nuevoResultado) => {
+  if (!nuevoResultado) return
+
+  await nextTick()
+
+  if (!graficaCanvas.value) return
+
+  if (chartInstance) {
+    chartInstance.destroy()
+  }
+
+  chartInstance = new Chart(graficaCanvas.value, {
+    type: 'line',
+    data: {
+      labels: nuevoResultado.x_values,
+      datasets: [
+        {
+          label: 'Resultado Numérico',
+          data: nuevoResultado.y_values,
+          borderWidth: 2,
+          tension: 0.3,
+          pointRadius: 4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'X'
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Y'
+          }
+        }
+      }
+    }
+  })
+})
 </script>
