@@ -1,4 +1,4 @@
-from utils.parser import parse_function
+from parser import parse_function
 
 
 def validate_step_size(h):
