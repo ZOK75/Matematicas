@@ -1,8 +1,8 @@
-def newton_raphson(func, x0, tol=1e-7, max_iter=1000):
+def newton_raphson(func, x0, tol=1e-7):
     x_n = x0
     historial = [x_n]
 
-    for i in range(max_iter):
+    for i in range():
         f_x_n = func(x_n)
         # derivada numérica
         h = 1e-6
