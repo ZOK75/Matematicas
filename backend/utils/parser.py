@@ -6,13 +6,10 @@ def parse_function(function_str: str, metodo: str="euler"):
         raise ValueError("La función no puede estar vacía")
 
     try:
-        # Normalizar a minúsculas
         function_str = function_str.lower()
 
-        # Definir variables simbólicas
         x, y = sp.symbols('x y')
 
-        # Funciones matemáticas permitidas
         allowed_functions = {
             "sin": sp.sin,
             "cos": sp.cos,
@@ -24,10 +21,8 @@ def parse_function(function_str: str, metodo: str="euler"):
             "pow": sp.Pow,  # alias
         }
 
-        # Convertir string a expresión simbólica segura
         expr = sp.sympify(function_str, locals=allowed_functions)
 
-        # Validación según método
         variables = expr.free_symbols
         if metodo in ["euler", "runge_kutta"]:
             if not variables.issubset({x, y}):

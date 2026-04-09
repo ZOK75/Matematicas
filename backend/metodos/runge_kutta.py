@@ -1,22 +1,28 @@
-def runge_kutta(f=None, x0=None, y0=None, h=None, n=None):
-    if f is None or x0 is None or y0 is None or h is None or n is None:
-        print("Error: faltan parámetros para ejecutar Runge-Kutta")
-        return None, None
+def runge_kutta(f, x0, y0, h, n):
+    x_vals = [x0]
+    y_vals = [y0]
+    ks_historial = [] # Para guardar los valores de k
 
-    # aquí va tu código normal
-    x_values = [x0]
-    y_values = [y0]
+    x = x0
+    y = y0
 
     for i in range(n):
-        k1 = h * f(x0, y0)
-        k2 = h * f(x0 + h/2, y0 + k1/2)
-        k3 = h * f(x0 + h/2, y0 + k2/2)
-        k4 = h * f(x0 + h, y0 + k3)
+        k1 = h * f(x, y)
+        k2 = h * f(x + h/2, y + k1/2)
+        k3 = h * f(x + h/2, y + k2/2)
+        k4 = h * f(x + h, y + k3)
 
-        y0 = y0 + (k1 + 2*k2 + 2*k3 + k4) / 6
-        x0 = x0 + h
+        ks_historial.append({
+            'k1': float(k1),
+            'k2': float(k2),
+            'k3': float(k3),
+            'k4': float(k4)
+        })
 
-        x_values.append(x0)
-        y_values.append(y0)
+        y = y + (k1 + 2*k2 + 2*k3 + k4) / 6
+        x = x + h
 
-    return x_values, y_values
+        x_vals.append(float(x))
+        y_vals.append(float(y))
+
+    return x_vals, y_vals, ks_historial

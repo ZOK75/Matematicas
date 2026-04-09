@@ -46,7 +46,6 @@ def validate_function(function_str):
     try:
         func = parse_function(function_str)
 
-        # prueba rápida de evaluación para detectar errores ocultos
         func(1.0, 1.0)
 
         return func

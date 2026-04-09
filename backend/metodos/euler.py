@@ -1,50 +1,26 @@
-def euler_mejorado(funcion, x0=None, y0=None, h=None, n=None):
-    """
-    Método de Euler mejorado para resolver ecuaciones diferenciales ordinarias.
-    
-    Parametros:
-    funcion: función que representa la ecuación diferencial (dy/dx = f(x, y))
-    x0: valor inicial de x
-    y0: valor inicial de y
-    h: tamaño del paso
-    n: número de iteraciones
-    
-    Returns:
-    Listas de valores de x e y calculados.
-    """
-    # Comprobar parámetros faltantes
-    missing = []
-    if funcion is None:
-        missing.append("funcion")
-    if x0 is None:
-        missing.append("x0")
-    if y0 is None:
-        missing.append("y0")
-    if h is None:
-        missing.append("h")
-    if n is None:
-        missing.append("n")
+def euler_mejorado(f, x0, y0, h, n):
+    x_vals = [float(x0)]
+    y_vals = [float(y0)]
+    detalles = [{'y_pred': 0, 'error': 0}]
 
-    if missing:
-        print(f"Faltan valores en Euler mejorado: {', '.join(missing)}")
-        return None, None
+    x = x0
+    y = y0
 
-    x_values = [x0]
-    y_values = [y0]
-    
     for i in range(n):
-        x_current = x_values[-1]
-        y_current = y_values[-1]
-        
-        # Calcular el valor intermedio 
-        k1 = funcion(x_current, y_current)
-        k2 = funcion(x_current + h, y_current + h * k1)
-        
-        # Actualizar los valores de x e y u
-        x_next = x_current + h
-        y_next = y_current + (h / 2) * (k1 + k2)
-        
-        x_values.append(x_next)
-        y_values.append(y_next)
-    
-    return x_values, y_values
+        y_pred = y + h * f(x, y)
+
+        y_corr = y + (h / 2) * (f(x, y) + f(x + h, y_pred))
+
+        error = abs(y_corr - y_pred)
+
+        y = y_corr
+        x = x + h
+
+        x_vals.append(float(x))
+        y_vals.append(float(y))
+        detalles.append({
+            'y_pred': float(y_pred),
+            'error': float(error)
+        })
+
+    return x_vals, y_vals, detalles
